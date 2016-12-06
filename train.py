@@ -84,7 +84,6 @@ with tf.Graph().as_default():
                       lr=FLAGS.lr,
                       clip=FLAGS.clip,
                       l2_reg_lambda=FLAGS.l2_reg_lambda,
-                      dropout_keep_prob=FLAGS.dropout_keep_prob,
                       init_embedding=init_embedding)
 
         # Define Training procedure
