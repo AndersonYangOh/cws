@@ -27,12 +27,12 @@ tf.flags.DEFINE_string("dev_file", "data/dev.csv", "dev data file")
 tf.flags.DEFINE_string("test_file", "data/test.csv", "test data file")
 
 # model names
-tf.flags.DEFINE_string("model_name", "cws", "model name")
+tf.flags.DEFINE_string("model_name", "cws_2", "model name")
 
 # Model Hyperparameters[t]
 tf.flags.DEFINE_float("lr", 0.01, "learning rate (default: 0.01)")
-tf.flags.DEFINE_float("dropout_keep_prob", 1.0, "Dropout keep probability (default: 0.8)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.000, "L2 regularizaion lambda (default: 0.5)")
+tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (default: 0.8)")
+tf.flags.DEFINE_float("l2_reg_lambda", 0.001, "L2 regularizaion lambda (default: 0.5)")
 tf.flags.DEFINE_float("clip", 5, "grident clip")
 
 
@@ -84,6 +84,7 @@ with tf.Graph().as_default():
                       lr=FLAGS.lr,
                       clip=FLAGS.clip,
                       l2_reg_lambda=FLAGS.l2_reg_lambda,
+                      dropout_keep_prob=FLAGS.dropout_keep_prob,
                       init_embedding=init_embedding)
 
         # Define Training procedure

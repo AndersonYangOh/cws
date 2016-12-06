@@ -8,6 +8,7 @@ class Model(object):
     def __init__(self, batch_size=100, vocab_size=5620, 
                  word_dim=50, lstm_dim=100, num_classes=4, 
                  l2_reg_lambda=0.0,
+                 dropout_keep_prob=1.0,
                  lr=0.001,
                  clip=5,
                  init_embedding=None,
