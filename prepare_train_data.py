@@ -71,4 +71,5 @@ def split_train_dev_test():
     df_test.to_csv(TEST_DATA, index=False)
 
 if __name__ == "__main__":
+    process_all_data()
     split_train_dev_test()
