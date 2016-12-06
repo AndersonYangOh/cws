@@ -1,6 +1,6 @@
 ## Chinese Word Segmentation Using Neural Architectures
 
-This is a Tensorflow implementation of the named eneity recognition model described in the [paper] (https://arxiv.org/abs/1603.01360). The original Theano implementation could be found [here] (https://github.com/glample/tagger)
+This is a Tensorflow implementation of the named entity recognition model described in this [paper] (https://arxiv.org/abs/1603.01360). The original Theano implementation could be found [here] (https://github.com/glample/tagger)
 .
 
 ### Model
@@ -8,6 +8,7 @@ This is a Tensorflow implementation of the named eneity recognition model descri
 - Word Embedding (initialized using [word2vec](https://code.google.com/archive/p/word2vec/))
 - Birectional LSTM
 - CRF
+- Bucket data based on sequence length
 
 ### Data
 
