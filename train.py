@@ -86,14 +86,6 @@ with tf.Graph().as_default():
                       l2_reg_lambda=FLAGS.l2_reg_lambda,
                       init_embedding=init_embedding)
 
-        # Define Training procedure
-        train_loss = model.loss
-        global_step = tf.Variable(0, name="global_step", trainable=False)
-        optimizer = tf.train.AdamOptimizer(FLAGS.lr)
-        tvars = tf.trainable_variables()
-        grads, _ = tf.clip_by_global_norm(tf.gradients(train_loss, tvars), FLAGS.clip)
-        train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=global_step)
-
         # Output directory for models
         try:
             shutil.rmtree(os.path.join(os.path.curdir, "models", FLAGS.model_name))
@@ -113,15 +105,8 @@ with tf.Graph().as_default():
         sess.run(tf.initialize_all_variables())
 
         def train_step(x_batch, y_batch, seq_len_batch):
-            feed_dict = {
-                model.x: x_batch,
-                model.y: y_batch,
-                model.seq_len: seq_len_batch,
-                model.dropout_keep_prob: FLAGS.dropout_keep_prob
-            }
-            _, step, loss = sess.run(
-                [train_op, global_step, train_loss],
-                feed_dict)
+            step, loss = model.train_step(sess, 
+                x_batch, y_batch, seq_len_batch, FLAGS.dropout_keep_prob)
 
             time_str = datetime.datetime.now().isoformat()
             print("{}: step {}, loss {:g}".format(time_str, step, loss))

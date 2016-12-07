@@ -90,6 +90,29 @@ class Model(object):
 
             self.loss = tf.reduce_mean(-log_likelihood)
 
+        with tf.variable_scope("train_ops") as scope:
+            self.optimizer = tf.train.AdamOptimizer(self.lr)
+
+            self.global_step = tf.Variable(0, name="global_step", trainable=False)
+
+            tvars = tf.trainable_variables()
+            grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), self.clip)
+            self.train_op = self.optimizer.apply_gradients(zip(grads, tvars), 
+                global_step=self.global_step)
+   
+    def train_step(self, sess, x_batch, y_batch, seq_len_batch, dropout_keep_prob):
+        feed_dict = {
+            self.x: x_batch,
+            self.y: y_batch,
+            self.seq_len: seq_len_batch,
+            self.dropout_keep_prob: dropout_keep_prob
+        }
+        _, step, loss = sess.run(
+            [self.train_op, self.global_step, self.loss],
+            feed_dict)
+
+        return step, loss
+
 
     def batch_predict(self, sess, N, batch_iterator):
         y_pred, y_true = [], []
@@ -127,7 +150,7 @@ class Model(object):
                 y_true += y_[:seq_len_].tolist()
 
         return y_true, y_pred
-        
+
 
     def predict(self, sess, sequence, seq_len):
         x = np.asarray([sequence], np.int32)
