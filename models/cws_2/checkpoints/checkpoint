@@ -1,0 +1,6 @@
+model_checkpoint_path: "/Users/jianpingl/Desktop/cws/models/cws_2/checkpoints/model-21400"
+all_model_checkpoint_paths: "/Users/jianpingl/Desktop/cws/models/cws_2/checkpoints/model-20600"
+all_model_checkpoint_paths: "/Users/jianpingl/Desktop/cws/models/cws_2/checkpoints/model-20800"
+all_model_checkpoint_paths: "/Users/jianpingl/Desktop/cws/models/cws_2/checkpoints/model-21000"
+all_model_checkpoint_paths: "/Users/jianpingl/Desktop/cws/models/cws_2/checkpoints/model-21200"
+all_model_checkpoint_paths: "/Users/jianpingl/Desktop/cws/models/cws_2/checkpoints/model-21400"

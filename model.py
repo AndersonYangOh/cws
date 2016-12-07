@@ -55,54 +55,43 @@ class Model(object):
                 tf.zeros([num_classes], 
                 name="bias"))
 
-    def forward(self, reuse=None):
-        x = tf.nn.embedding_lookup(self.embedding, self.x)
-        x = tf.nn.dropout(x, self.dropout_keep_prob)
+        with tf.variable_scope("lstm") as scope:
+            self.lstm_fw_cell = tf.nn.rnn_cell.LSTMCell(self.lstm_dim)
+            self.lstm_bw_cell = tf.nn.rnn_cell.LSTMCell(self.lstm_dim)
 
-        seq_len = tf.cast(self.seq_len, tf.int64)
+        with tf.variable_scope("forward") as scope:
+            x = tf.nn.embedding_lookup(self.embedding, self.x)
+            x = tf.nn.dropout(x, self.dropout_keep_prob)
 
-        lstm_fw_cell = tf.nn.rnn_cell.LSTMCell(self.lstm_dim)
-        lstm_bw_cell = tf.nn.rnn_cell.LSTMCell(self.lstm_dim)
+            seq_len = tf.cast(self.seq_len, tf.int64)
 
-        with tf.variable_scope("Bi_RNN", reuse=reuse) as cope:
             (forward_output, backward_output), _ = tf.nn.bidirectional_dynamic_rnn(
-                lstm_fw_cell,
-                lstm_bw_cell,
+                self.lstm_fw_cell,
+                self.lstm_bw_cell,
                 x,
                 dtype=tf.float32,
                 sequence_length=seq_len,
-                scope="Bi_RNN"
                 )
 
-        output = tf.concat(2, [forward_output, backward_output])
+            output = tf.concat(2, [forward_output, backward_output])
 
-        output = tf.reshape(output, [-1, self.lstm_dim * 2])
+            output = tf.reshape(output, [-1, self.lstm_dim * 2])
 
-        matricized_unary_scores = tf.matmul(output, self.W) + self.b
+            matricized_unary_scores = tf.matmul(output, self.W) + self.b
 
-        unary_scores = tf.reshape(
-            matricized_unary_scores,
-            [self.batch_size, -1, self.num_classes])
+            self.unary_scores = tf.reshape(
+                matricized_unary_scores,
+                [self.batch_size, -1, self.num_classes])
 
-        return unary_scores
+        with tf.variable_scope("loss") as scope:
+            # CRF log likelihood
+            log_likelihood, self.transition_params = tf.contrib.crf.crf_log_likelihood(
+                self.unary_scores, self.y, self.seq_len)
 
-    def loss(self):
-        unary_scores = self.forward(reuse=None)
+            self.loss = tf.reduce_mean(-log_likelihood)
 
-        # CRF log likelihood
-        log_likelihood, self.transition_params = tf.contrib.crf.crf_log_likelihood(
-            unary_scores, self.y, self.seq_len)
-
-        loss = tf.reduce_mean(-log_likelihood)
-
-        return loss
-
-    def infer(self):
-        unary_scores = self.forward(reuse=True)
-        return unary_scores, self.transition_params
 
     def batch_predict(self, sess, N, batch_iterator):
-        unary_scores_op = self.forward(reuse=True)
         y_pred, y_true = [], []
         num_batches = int( (N - 1)/self.batch_size ) + 1
 
@@ -124,7 +113,7 @@ class Model(object):
             }
 
             unary_scores, transition_params = sess.run(
-                [unary_scores_op, self.transition_params], feed_dict)
+                [self.unary_scores, self.transition_params], feed_dict)
 
             for unary_scores_, y_, seq_len_ in zip(unary_scores, y_batch, seq_len_batch):
                 # remove padding
@@ -138,10 +127,9 @@ class Model(object):
                 y_true += y_[:seq_len_].tolist()
 
         return y_true, y_pred
+        
 
     def predict(self, sess, sequence, seq_len):
-        unary_scores_op = self.forward(reuse=True)
-
         x = np.asarray([sequence], np.int32)
         seq_len = np.asarray([seq_len], np.int32)
 
@@ -152,7 +140,7 @@ class Model(object):
         }
 
         unary_scores, transition_params = sess.run(
-            [unary_scores_op, self.transition_params], feed_dict)
+            [self.unary_scores, self.transition_params], feed_dict)
 
         unary_scores_ = unary_scores[0]
 
@@ -169,12 +157,13 @@ def test():
     print model.W.get_shape()
     print model.b.get_shape()
 
-    x = tf.constant([[1, 0], [1, 2]], dtype=tf.int32)
-    seq_len = tf.constant([1, 2], dtype=tf.int32)
+    print model.lstm_fw_cell
+    print model.lstm_bw_cell
 
-    unary_scores = model.forward()
+    print model.unary_scores.get_shape()
 
-    print unary_scores.get_shape()
+    print model.loss.get_shape()
+
 
 
 if __name__ == "__main__":

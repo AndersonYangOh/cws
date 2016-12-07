@@ -31,14 +31,14 @@ tf.flags.DEFINE_string("model_name", "cws_2", "model name")
 
 # Model Hyperparameters[t]
 tf.flags.DEFINE_float("lr", 0.01, "learning rate (default: 0.01)")
-tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (default: 0.8)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.001, "L2 regularizaion lambda (default: 0.5)")
+tf.flags.DEFINE_float("dropout_keep_prob", 1.0, "Dropout keep probability (default: 0.8)")
+tf.flags.DEFINE_float("l2_reg_lambda", 0.000, "L2 regularizaion lambda (default: 0.5)")
 tf.flags.DEFINE_float("clip", 5, "grident clip")
 
 
 # Training parameters
 tf.flags.DEFINE_integer("batch_size", 100, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("num_epochs", 10000, "Number of training epochs (default: 40)")
+tf.flags.DEFINE_integer("num_epochs", 50000, "Number of training epochs (default: 40)")
 tf.flags.DEFINE_integer("evaluate_every", 200, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("checkpoint_every", 200, "Save model after this many steps (default: 100)")
 
@@ -87,7 +87,7 @@ with tf.Graph().as_default():
                       init_embedding=init_embedding)
 
         # Define Training procedure
-        train_loss = model.loss()
+        train_loss = model.loss
         global_step = tf.Variable(0, name="global_step", trainable=False)
         optimizer = tf.train.AdamOptimizer(FLAGS.lr)
         tvars = tf.trainable_variables()
@@ -133,7 +133,7 @@ with tf.Graph().as_default():
             y_true, y_pred = model.batch_predict(sess, N, iterator)
 
             acc = accuracy_score(y_true, y_pred)
-            cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2, 3])
+            cm = confusion_matrix(y_true, y_pred, labels=range(FLAGS.num_classes))
             if test:
                 print "test accuracy: ", acc
                 print "confusion_matrix: \n", cm
