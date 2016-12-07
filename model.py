@@ -36,9 +36,6 @@ class Model(object):
         self.seq_len = tf.placeholder(tf.int32, [self.batch_size])
         self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
 
-        # CRF transition matrix: shape of [n_classes, n_clasess]
-        self.transition_params = None
-
         with tf.variable_scope("embedding") as scope:
             self.embedding = tf.Variable(
                 self.init_embedding, 
